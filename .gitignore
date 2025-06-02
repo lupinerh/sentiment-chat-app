@@ -1,0 +1,24 @@
+# OS generated files
+.DS_Store
+
+# Virtual environments
+.env
+.venv
+
+# Python bytecode and cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# IDE
+.vscode/
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints
+
+# Because Git LFS
+models/*.gguf
+# *.joblib
+# *.pkl
+
+data/*.csv
