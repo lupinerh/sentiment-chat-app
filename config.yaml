@@ -1,16 +1,17 @@
-llm_provider: "gemini_api" # "llm_cpu" OR "gemini_api"
+preprocessor:
+    stopwords_path: "./data/stopwords.json"
 
-paths:
-  models:
-    logreg_classifier: "./models/tfidf_logreg_classifier.joblib"
-    llm_cpu_chatbot:
-      model_local_dir: "./models"
-      model_url_repo: "microsoft/Phi-3-mini-4k-instruct-gguf"
-      model_filename: "Phi-3-mini-4k-instruct-q4.gguf"
-  preprocessor:
-    stopwords: "./data/stopwords.json"
+sentiment_model:
+  logreg_clf_path: "./models/tfidf_logreg_classifier.joblib"
+  bert_clf_dir: "./models/rubert_tiny/"
 
-gemini_api_settings:
-  model_name: "gemini-2.0-flash-lite"
-  temperature: 0.7
-  max_output_tokens: 250
+llm_chatbot:
+  use_model: "gemini_api" # "llm_cpu" OR "gemini_api"
+  llm_cpu_chatbot:
+    model_local_dir: "./models"
+    model_url_repo: "microsoft/Phi-3-mini-4k-instruct-gguf"
+    model_filename: "Phi-3-mini-4k-instruct-q4.gguf"
+  gemini_api_settings:
+    model_name: "gemini-2.0-flash-lite"
+    temperature: 0.7
+    max_output_tokens: 250

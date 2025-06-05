@@ -4,16 +4,19 @@ import streamlit as st
 from streamlit_extras.st_keyup import st_keyup
 
 from src.config_and_settings import (SessionKeys, 
-                                     EMPTY_TEXT_PLACEHOLDER, 
+                                     EMPTY_TEXT_PLACEHOLDER,
+                                     MODEL_ID_LOGREG, MODEL_ID_BERT,
                                      load_config)
-from src.model_loader import (load_sentiment_model_cached, 
+from src.model_loader import (load_sentiment_logreg_cached,
+                              load_sentiment_bert_cached, 
                               load_llm_chatbot_cached)
 from src.sentiment_analysis import analyze_text_sentiment
 from src.ui_components import (
     configure_page, 
     display_current_input_sentiment_analysis,
     display_welcome_message,
-    display_chat_history
+    display_chat_history,
+    display_sentiment_model_selector
 )
 from src.app_state import initialize_session_state
 from src.chat_logic import (process_user_send_action, 
@@ -31,11 +34,7 @@ logging.basicConfig(
 # -- UI Column Rendering --
 def render_left_column(sentiment_model: LogRegClassifier) -> None:
     """Renders the left UI column (user input, sentiment analysis)."""
-    st.caption(
-        "Введите текст – тональность обновляется сразу.  \n"
-        "Больше одного слова – обновляется анализ и по словам."
-    )
-
+    
     bot_is_typing_now = st.session_state.get(SessionKeys.BOT_IS_TYPING, False)
     current_draft_from_state = \
         st.session_state.get(SessionKeys.USER_DRAFT_INPUT, "")
@@ -48,6 +47,10 @@ def render_left_column(sentiment_model: LogRegClassifier) -> None:
                                              text_for_analysis, 
                                              sentiment_model)
 
+    st.caption(
+        "Тональность обновляется сразу. " \
+        "Больше слов – обновляется и по словам."
+    )
     user_input_from_keyup = st_keyup(
         label="",
         placeholder=EMPTY_TEXT_PLACEHOLDER,
@@ -106,31 +109,35 @@ def main_app() -> None:
         return
 
     if not st.session_state.get(SessionKeys.MODELS_LOADED, False):
-        st.session_state[SessionKeys.SENTIMENT_MODEL] = \
-            load_sentiment_model_cached(app_config)
+        st.session_state[SessionKeys.SENTIMENT_MODELS_DICT][MODEL_ID_LOGREG] = \
+            load_sentiment_logreg_cached(app_config)
+        st.session_state[SessionKeys.SENTIMENT_MODELS_DICT][MODEL_ID_BERT] = \
+            load_sentiment_bert_cached(app_config)
         st.session_state[SessionKeys.LLM_CHATBOT] = \
             load_llm_chatbot_cached(app_config)
 
-        if (st.session_state[SessionKeys.SENTIMENT_MODEL] 
+        if (st.session_state[SessionKeys.SENTIMENT_MODELS_DICT][MODEL_ID_LOGREG] 
+            and st.session_state[SessionKeys.SENTIMENT_MODELS_DICT][MODEL_ID_BERT]
             and st.session_state[SessionKeys.LLM_CHATBOT]):
+
+            st.session_state[SessionKeys.SELECTED_SENTIMENT_MODEL] = \
+                st.session_state[SessionKeys.SENTIMENT_MODELS_DICT][MODEL_ID_LOGREG]
             st.session_state[SessionKeys.MODELS_LOADED] = True
             st.rerun()
-        elif not st.session_state[SessionKeys.SENTIMENT_MODEL]:
-            err = "Sentiment Model не загружена, приложение остановлено"
+
+        else:
+            err = "Модели не загружены, приложение остановлено"
             st.error(err)
             logging.error(err)
             st.stop()
-        elif not not st.session_state[SessionKeys.MODELS_LOADED]:
-            st.error("LMM model не загружена, приложение остановлено")
-            logging.error("LMM model не загружена, приложение остановлено")
-            st.stop()
 
-    sentiment_model = st.session_state.get(SessionKeys.SENTIMENT_MODEL)
+    sentiment_model = st.session_state.get(SessionKeys.SELECTED_SENTIMENT_MODEL)
     llm_chatbot = st.session_state.get(SessionKeys.LLM_CHATBOT)
 
     left_column, right_column = st.columns([2, 3])
 
     with left_column:
+        display_sentiment_model_selector()
         render_left_column(sentiment_model)
 
     with right_column:

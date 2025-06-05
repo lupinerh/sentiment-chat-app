@@ -12,6 +12,7 @@ tags:
   - python
   - cpu-inference
   - google-gemini
+  - bert
 ---
 
 # 💬 Sentiment Chat App
@@ -19,15 +20,14 @@ tags:
 ---
 
 * **Demo Hugging Face Space:** [**Sentiment Chat App**](https://huggingface.co/spaces/lupinerh/sentiment-chat-app)
-* **Demo Streamlit Cloud:** [**Sentiment Chat App**](https://sentiment-chat-app.streamlit.app/)
 
 ---
 
 This application is an interactive chatbot that:
-*   Analyzes the sentiment of user messages in real-time.
+*   Analyzes the sentiment of user messages in real-time using a user-selectable sentiment analysis model.
 *   Visualizes word importance for sentiment determination.
-*   Engages in dialogue using a Large Language Model (LLM).
-*   Offers a choice between a locally run LLM and a cloud-based LLM (Google Gemini).
+*   Engages in dialogue using a LLM.
+*   Offers a choice between a locally run LLM and a cloud-based LLM for dialogue generation.
 *   Considers the detected sentiment of the user's message when generating a response.
 
 
@@ -36,7 +36,11 @@ This application is an interactive chatbot that:
 *   **Dataset for Sentiment Analysis Training:**
     *   The sentiment analysis model was trained on the **RuTweetCorp dataset**.
 
-*   **Supported LLM Models:**
+*   **Sentiment Analysis Models (User Selectable):**
+    *  **ML Model** 
+    *  **BERT-based Model:** Fine-tuned [**RuBERT-tiny2**] (https://huggingface.co/seara/rubert-tiny2-russian-sentiment).
+
+*   **Supported LLM Models for Dialogue Generation::**
     *   The application can be configured to use one of the following LLMs:
         *   **Local LLM (CPU-based):**
             *   **Model:** **Phi-3-mini-4k-instruct** by Microsoft.

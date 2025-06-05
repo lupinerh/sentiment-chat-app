@@ -1,5 +1,6 @@
 import streamlit as st
 from src.config_and_settings import SessionKeys
+from src.config_and_settings import MODEL_ID_LOGREG, MODEL_ID_BERT
 
 def initialize_session_state() -> None:
     """Initializes the session state with default values."""
@@ -8,7 +9,11 @@ def initialize_session_state() -> None:
         SessionKeys.USER_DRAFT_INPUT: "",
         SessionKeys.USER_DATA_FOR_BOT: None,
         SessionKeys.MODELS_LOADED: False,
-        SessionKeys.SENTIMENT_MODEL: None,
+        SessionKeys.SELECTED_SENTIMENT_MODEL: None,
+        SessionKeys.SENTIMENT_MODELS_DICT: {
+            MODEL_ID_LOGREG: None,
+            MODEL_ID_BERT: None
+        },
         SessionKeys.LLM_CHATBOT: None,
         SessionKeys.BOT_IS_TYPING: False,
     }

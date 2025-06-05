@@ -4,13 +4,13 @@ import json
 import pandas as pd
 from typing import List
 
-class Preprocessor:
+class LogRegPreprocessor:
     TEXT_PATTERNS = [
         (r'(?:http|https)?://\S+\b|www\.\S+', ' '), # URL
 
         (r'@\w+', ' '), # username
         (r'\S*@\S*\s?', ' '), # email
-        (r'\brt\b', ' '), # retweets
+        (r'(?i)\brt\b', ' '), # retweets
         (r'#(\w+)', r'\1 '),  # hastags - only #
         (r'\d+', ' '), # numbers
         
@@ -18,11 +18,11 @@ class Preprocessor:
         (r"\(\(+", " "), # (((
         (r"\)+", " "), # )))
         
-        (r'([>:;=-]+[\(cсCС/\\[L{<@]+)', ' '),  # :(, >:(
-        (r'([>:;=-]+[\)dD*pPрРbB]+)', ' '),    # :), :-D
-        (r'\b(99+|0_0|o_o|о_о)\b', ' '), # text bad smiles
-        (r'\b(:d+|xd+|:dd|dd)\b', ' '), # text good smiles
-        (r'\b[ах]{2,}[ах]*\b', ' <LAUGH> '), 
+        (r'(?i)([>:;=-]+[\(cсCС/\\[L{<@]+)', ' '),  # :(, >:(
+        (r'(?i)([>:;=-]+[\)dD*pPрРbB]+)', ' '),    # :), :-D
+        (r'(?i)\b(99+|0_0|o_o|о_о)\b', ' '), # text bad smiles
+        (r'(?i)\b(:d+|xd+|:dd|dd)\b', ' '), # text good smiles
+        (r'(?i)\b[ах]{2,}[ах]*\b', ' <LAUGH> '), 
         (r'[\U0001F600-\U0001F64F]', ' '), # emoji
         
         (r'[\r\n\t]', ' '), # newline/tabs
@@ -41,7 +41,7 @@ class Preprocessor:
 
     def _load_resources(self) -> None:
         # patterns
-        self.text_patterns = Preprocessor.TEXT_PATTERNS
+        self.text_patterns = LogRegPreprocessor.TEXT_PATTERNS
         # stopwords
         with open(self.stopwords_path, 'r', encoding='utf-8') as f:
             self.stopwords = set(json.load(f)) 

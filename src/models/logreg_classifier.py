@@ -5,13 +5,13 @@ import joblib
 import numpy as np
 from typing import List, Optional, Tuple
 
-from ..preprocessor import Preprocessor
+from src.preprocessors.logreg_preprocessor import LogRegPreprocessor
 
 
 class LogRegClassifier:
     
     def __init__(self, 
-                 preprocessor: Preprocessor, 
+                 preprocessor: LogRegPreprocessor, 
                  model_path: str, 
                  class_names: Optional[List[str]] = None) -> None:
         self.preprocessor = preprocessor

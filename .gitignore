@@ -16,9 +16,9 @@ __pycache__/
 # Jupyter Notebook checkpoints
 .ipynb_checkpoints
 
-# Because Git LFS
+# Models
 models/*.gguf
 # *.joblib
-# *.pkl
+# *.safetensors
 
 data/*.csv

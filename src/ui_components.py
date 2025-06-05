@@ -1,3 +1,4 @@
+import logging 
 import streamlit as st
 from streamlit_extras.stylable_container import stylable_container
 from src.models.logreg_classifier import LogRegClassifier 
@@ -5,7 +6,9 @@ from src.sentiment_analysis import (get_sentiment_parameters,
                                     display_shap_annotated_text)
 from src.config_and_settings import (
     SessionKeys, WELCOME_TITLE, WELCOME_SUBHEADER, 
-    WELCOME_EXAMPLES_HEADER, WELCOME_EXAMPLES
+    WELCOME_EXAMPLES_HEADER, WELCOME_EXAMPLES,
+    SELECTED_BUTTON_CSS, UNSELECTED_BUTTON_CSS,
+    MODEL_ID_LOGREG, MODEL_ID_BERT
 )
 
 def configure_page() -> None:
@@ -15,6 +18,47 @@ def configure_page() -> None:
         layout="wide",
         page_icon="💬"
     )
+
+def display_sentiment_model_selector():
+
+    if "ui_selected" not in st.session_state:
+        st.session_state.ui_selected = MODEL_ID_LOGREG
+
+    logreg_css = (SELECTED_BUTTON_CSS 
+                  if st.session_state.ui_selected == MODEL_ID_LOGREG 
+                  else UNSELECTED_BUTTON_CSS)
+    bert_css = (SELECTED_BUTTON_CSS 
+                if st.session_state.ui_selected == MODEL_ID_BERT 
+                else UNSELECTED_BUTTON_CSS)
+
+    st.caption("Анализатор настроения:")
+    col1, col2 = st.columns(2)
+
+    with col1:
+        with stylable_container(key=f"{MODEL_ID_LOGREG}_container", 
+                                css_styles=logreg_css):
+            if st.button("⚡️ **ML:** Быстрее", 
+                         use_container_width=True, 
+                         key=f"{MODEL_ID_LOGREG}_btn"):
+                if st.session_state.ui_selected != MODEL_ID_LOGREG:
+                    st.session_state[SessionKeys.SELECTED_SENTIMENT_MODEL] = \
+                            st.session_state[SessionKeys.SENTIMENT_MODELS_DICT][MODEL_ID_LOGREG]
+                    st.session_state.ui_selected = MODEL_ID_LOGREG
+                    logging.info(f"Sentiment-модель изменена LOGREG")
+                    st.rerun()
+
+    with col2:
+        with stylable_container(key=f"{MODEL_ID_BERT}_container", 
+                                css_styles=bert_css):
+            if st.button("📊 **Bert:** Точнее", 
+                         use_container_width=True, 
+                         key=f"{MODEL_ID_BERT}_btn"):
+                if st.session_state.ui_selected != MODEL_ID_BERT:
+                    st.session_state[SessionKeys.SELECTED_SENTIMENT_MODEL] = \
+                            st.session_state[SessionKeys.SENTIMENT_MODELS_DICT][MODEL_ID_BERT]
+                    st.session_state.ui_selected = MODEL_ID_BERT
+                    logging.info(f"Sentiment-модель изменена BERT")
+                st.rerun()
 
 
 def display_current_input_sentiment_analysis(score: float, 
