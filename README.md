@@ -38,7 +38,7 @@ This application is an interactive chatbot that:
 
 *   **Sentiment Analysis Models (User Selectable):**
     *  **ML Model** 
-    *  **BERT-based Model:** Fine-tuned [**RuBERT-tiny2**] (https://huggingface.co/seara/rubert-tiny2-russian-sentiment).
+    *  **BERT-based Model:** Fine-tuned [RuBERT-tiny2](https://huggingface.co/seara/rubert-tiny2-russian-sentiment).
 
 *   **Supported LLM Models for Dialogue Generation::**
     *   The application can be configured to use one of the following LLMs:
