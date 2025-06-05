@@ -109,7 +109,9 @@ class BertClassifier:
         
         explainer = shap.Explainer(self._predict_function_shap, 
                                    shap_masker, 
-                                   output_names=self.class_names)
+                                   output_names=self.class_names,
+                                   algorithm="partition",
+                                    max_evals=30)
         
         shap_values = explainer([text])
 

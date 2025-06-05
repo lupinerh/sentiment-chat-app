@@ -66,7 +66,9 @@ class LogRegClassifier:
         explainer = shap.Explainer(
             model=self._predict_function_shap,
             masker=masker,
-            output_names=self.class_names
+            output_names=self.class_names,
+            algorithm="partition",
+            max_evals=100
         )
         
         shap_values = explainer([text])
