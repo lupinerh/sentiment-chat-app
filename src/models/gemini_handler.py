@@ -2,7 +2,7 @@ import logging
 from google import genai
 from google.genai import types
 import os
-from typing import Generator, List, Dict, Any
+from typing import Generator, List, Dict, Any, Optional
 
 ChatMessage = Dict[str, Any]
 
@@ -53,7 +53,7 @@ class GeminiChatbot:
         self.system_prompt=GeminiChatbot.DEFAULT_SYSTEM_PROMPT_EN
 
 
-    def _prepare_contents_with_system_prompt(
+    def _prepare_contents(
             self, 
             chat_history: List[ChatMessage],
             current_user_message_with_sentiment: str
@@ -84,31 +84,39 @@ class GeminiChatbot:
             yield f" [Ошибка: Модель Gemini не инициализирована.] "
             return
 
-        current_user_sentiment_info_str = \
-            f"[Sentiment: {user_sentiment_label} ({user_sentiment_score:.2f})]"
-        full_user_message_with_sentiment = \
-            f"{current_user_sentiment_info_str}{user_message}"
+        current_message_text = \
+            f"[Sentiment: {user_sentiment_label} ({user_sentiment_score:.2f})]{user_message}"
+        
+        # Default settings (Gemini)
+        config_system_instruction = self.system_prompt
+        final_user_message = current_message_text
 
-        contents_for_gemini = self._prepare_contents_with_system_prompt(
+        # Gemma
+        if "gemma" in self.model_name.lower():
+            config_system_instruction = None
+            final_user_message = \
+                f"System Instruction: {self.system_prompt}\n\nUser Message: {current_message_text}"
+        
+        contents_for_api = self._prepare_contents(
             chat_history, 
-            full_user_message_with_sentiment
+            final_user_message
         )
         
         try:
 
             response = self.client.models.generate_content_stream(
                 model=self.model_name,
-                contents=contents_for_gemini,
+                contents=contents_for_api,
                 config=types.GenerateContentConfig(
                     temperature=self.temperature,
                     max_output_tokens=self.max_output_tokens,
-                    system_instruction=self.system_prompt
+                    system_instruction=config_system_instruction
                     )
             )
 
             for chunk in response:
                 yield chunk.text
                 
-        except Exception as e:
-            logging.error(f"Ошибка генерации ответа Gemini")
+        except Exception:
+            logging.error("Ошибка генерации ответа Gemini")
             yield f" [Произошла ошибка в Gemini. Попробуй еще раз] "
