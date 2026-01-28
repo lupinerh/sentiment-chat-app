@@ -62,8 +62,8 @@ def handle_bot_response_generation(sentiment_model: LogRegClassifier,
                     full_bot_response_text += chunk
                     message_placeholder.markdown(full_bot_response_text + "▌")
                     time.sleep(0.01) # for typing effect
-            except Exception as e:
-                logging.error(f'Ошибка генерации ответа')
+            except Exception:
+                logging.error('Ошибка генерации ответа')
                 full_bot_response_text = ("Извините, у меня возникла ошибка "
                                           "при генерации ответа.")
             finally:

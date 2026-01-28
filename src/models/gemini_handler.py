@@ -115,7 +115,8 @@ class GeminiChatbot:
             )
 
             for chunk in response:
-                yield chunk.text
+                if chunk.text: 
+                    yield chunk.text
                 
         except Exception:
             logging.error("Ошибка генерации ответа Gemini")
