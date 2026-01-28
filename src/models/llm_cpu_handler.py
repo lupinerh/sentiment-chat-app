@@ -1,10 +1,16 @@
 import logging
 import os
 import time
-from llama_cpp import Llama
 import streamlit as st
 from huggingface_hub import hf_hub_download
-from typing import Generator, List, Dict, Any, Optional
+from typing import Generator, List, Dict, Any
+
+try:
+    from llama_cpp import Llama
+    LLAMA_AVAILABLE = True
+except ImportError:
+    Llama = None
+    LLAMA_AVAILABLE = False
 
 ChatMessage = Dict[str, Any]
 
@@ -26,6 +32,11 @@ class LLMCPUChatbot:
                  model_local_dir: str, 
                  model_url_repo: str,
                  model_filename: str) -> None:
+        
+        if not LLAMA_AVAILABLE:
+            logging.error("Llama library не установлена!")
+            self.model = None
+            return 
 
         self.model_local_dir = model_local_dir
         self.model_url_repo = model_url_repo
@@ -50,7 +61,7 @@ class LLMCPUChatbot:
                         local_dir=self.model_local_dir,
                         local_dir_use_symlinks=False)
     
-    def _load_model(self) -> Optional[Llama]:
+    def _load_model(self):
 
         if not os.path.exists(self.model_local_path):
             if self.model_url_repo and self.model_filename:
