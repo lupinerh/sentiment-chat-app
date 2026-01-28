@@ -13,6 +13,7 @@ tags:
   - cpu-inference
   - google-gemini
   - bert
+python_version: 3.11
 ---
 
 # 💬 Sentiment Chat App
