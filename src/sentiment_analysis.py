@@ -1,10 +1,10 @@
 import streamlit as st
 from streamlit_extras.annotated_text import annotated_text
-from src.models.logreg_classifier import LogRegClassifier
+from src.models.sentiment_model_protocol import SentimentModelProtocol
 from src.config_and_settings import SENTIMENT_THRESHOLD
 
-def analyze_text_sentiment(text: str, 
-                           sentiment_model: LogRegClassifier) -> float:
+def analyze_text_sentiment(text: str,
+                           sentiment_model: SentimentModelProtocol) -> float:
     """Analyzes text sentiment and returns a score."""
     if not text.strip():
         return 0.0

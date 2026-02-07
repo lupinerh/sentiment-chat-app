@@ -27,9 +27,9 @@ def load_sentiment_logreg_cached(app_config: dict) -> LogRegClassifier | None:
         logging.error(f"Ошибка конфигурации при загрузке LogReg")
         st.error(f"Ошибка конфигурации при загрузке модели настроения")
         return None
-    except Exception as e:
-        logging.error(f"Не удалось загрузить LogReg")
-        st.error(f"Не удалось загрузить модель настроения")
+    except Exception:
+        logging.error("Не удалось загрузить LogReg")
+        st.error("Не удалось загрузить модель настроения")
         return None
     
 @st.cache_resource(show_spinner="Загрузка модели настроения...")
@@ -46,13 +46,13 @@ def load_sentiment_bert_cached(app_config: dict) -> BertClassifier | None:
             
         return model if model.is_ready else None
     
-    except KeyError as e:
-        logging.error(f"Ошибка конфигурации при загрузке Bert")
-        st.error(f"Ошибка конфигурации при загрузке модели настроения")
+    except KeyError:
+        logging.error("Ошибка конфигурации при загрузке Bert")
+        st.error("Ошибка конфигурации при загрузке модели настроения")
         return None
-    except Exception as e:
-        logging.error(f"Не удалось загрузить Bert")
-        st.error(f"Не удалось загрузить модель настроения")
+    except Exception:
+        logging.error("Не удалось загрузить Bert")
+        st.error("Не удалось загрузить модель настроения")
         return None
 
 @st.cache_resource(show_spinner="Загрузка ИИ-модели...")
@@ -93,6 +93,6 @@ def load_llm_chatbot_cached(app_config: dict
         
         return model if model.is_ready else None
         
-    except Exception as e:
-        st.error(f"Не удалось загрузить LLM чат-бота")
+    except Exception:
+        st.error("Не удалось загрузить LLM чат-бота")
         return None

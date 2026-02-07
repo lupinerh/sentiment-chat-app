@@ -1,9 +1,12 @@
-import logging 
+import logging
 import streamlit as st
 from streamlit_extras.stylable_container import stylable_container
-from src.models.logreg_classifier import LogRegClassifier 
-from src.sentiment_analysis import (get_sentiment_parameters, 
-                                    display_shap_annotated_text)
+from src.models.sentiment_model_protocol import SentimentModelProtocol
+from src.sentiment_analysis import (
+    analyze_text_sentiment,
+    get_sentiment_parameters,
+    display_shap_annotated_text
+)
 from src.config_and_settings import (
     SessionKeys, WELCOME_TITLE, WELCOME_SUBHEADER, 
     WELCOME_EXAMPLES_HEADER, WELCOME_EXAMPLES,
@@ -61,9 +64,96 @@ def display_sentiment_model_selector():
                 st.rerun()
 
 
-def display_current_input_sentiment_analysis(score: float, 
-                                             text: str, 
-                                             sentiment_model: LogRegClassifier
+def display_compare_toggle() -> bool:
+    st.caption("Выбранная модель влияет на чат.")
+    return st.toggle("Сравнить модели",
+                     value=st.session_state.get(SessionKeys.COMPARE_MODE, False),
+                     key=SessionKeys.COMPARE_MODE)
+
+
+def display_compact_compare_card(logreg_score: float,
+                                 bert_score: float) -> None:
+    container_css = (
+        "{background-color: #f7f7f7; padding: 10px 12px; "
+        "border-radius: 10px; margin: 8px 0; "
+        "border: 1px solid rgba(0,0,0,0.06);}"
+    )
+
+    def render_row(model_label: str,
+                   score: float,
+                   slider_key: str) -> None:
+        emoji_label, color = get_sentiment_parameters(score)
+        col_label, col_score, col_slider = st.columns([2, 2, 4])
+
+        with col_label:
+            with stylable_container(
+                css_styles=(
+                    f"{{background-color: {color}; padding: 4px 8px; "
+                    f"border-radius: 999px; display: inline-block;}}"
+                ),
+                key=f"{slider_key}_badge"
+            ):
+                st.markdown(f"**{model_label}**")
+
+        with col_score:
+            st.markdown(f"{emoji_label}  **{score:+.2f}**")
+
+        with col_slider:
+            st.slider("Level", -1.0, 1.0, float(score), 0.01,
+                      disabled=True, label_visibility="collapsed",
+                      key=slider_key)
+
+    with stylable_container(css_styles=container_css,
+                            key="compare_compact_container"):
+        render_row("⚡️ ML", logreg_score, "compare_slider_ml")
+        render_row("📊 BERT", bert_score, "compare_slider_bert")
+
+
+def _display_word_explanations(model_label: str,
+                               text: str,
+                               sentiment_model: SentimentModelProtocol) -> None:
+    st.markdown(f"**{model_label}: вклад слов**")
+
+    if len(text.split()) < 2:
+        st.caption("Введите минимум 2 слова, чтобы увидеть вклад слов.")
+        return
+
+    with st.spinner("Анализ важности слов..."):
+        shap_scores = sentiment_model.explain_shap_text(text)
+
+    if shap_scores:
+        display_shap_annotated_text(shap_scores)
+    else:
+        st.caption("Не удалось вычислить вклад слов для этого текста.")
+
+
+def display_compare_input_sentiment_analysis(text: str,
+                                             model_logreg: SentimentModelProtocol,
+                                             model_bert: SentimentModelProtocol
+                                             ) -> None:
+    st.caption("Сравнение моделей по одному тексту")
+    st.caption("Сравнение может быть медленнее на больших текстах.")
+
+    logreg_score = analyze_text_sentiment(text, model_logreg)
+    bert_score = analyze_text_sentiment(text, model_bert)
+
+    score_diff = bert_score - logreg_score
+    if abs(score_diff) < 0.01:
+        st.markdown("Модели дают почти одинаковую оценку.")
+    elif score_diff > 0:
+        st.markdown(f"**BERT** более позитивен на **{score_diff:+.2f}**")
+    else:
+        st.markdown(f"**ML** более позитивен на **{abs(score_diff):.2f}**")
+
+    display_compact_compare_card(logreg_score, bert_score)
+
+    _display_word_explanations("⚡️ ML", text, model_logreg)
+    _display_word_explanations("📊 BERT", text, model_bert)
+
+
+def display_current_input_sentiment_analysis(score: float,
+                                             text: str,
+                                             sentiment_model: SentimentModelProtocol
                                              ) -> None:
     """Displays the sentiment analysis of the current input text."""
     emoji_label, color = get_sentiment_parameters(score)

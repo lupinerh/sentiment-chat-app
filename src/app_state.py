@@ -16,6 +16,7 @@ def initialize_session_state() -> None:
         },
         SessionKeys.LLM_CHATBOT: None,
         SessionKeys.BOT_IS_TYPING: False,
+        SessionKeys.COMPARE_MODE: False,
     }
 
     for key, value in default_values.items():

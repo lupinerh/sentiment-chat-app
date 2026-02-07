@@ -74,8 +74,8 @@ class LLMCPUChatbot:
                     self._download_model()
                     st.success(f"Модель c URL загружена в "
                                f"'{self.model_local_path}'.")
-                except Exception as e:
-                    logging.error(f"Загрузка модели не удалась")
+                except Exception:
+                    logging.error("Загрузка модели не удалась")
                     return None
             else:
                 error_msg = (f"Модель не найдена "
@@ -101,8 +101,8 @@ class LLMCPUChatbot:
                 f"LLM загружена за {end_time - start_time:.2f} секунд."
                 )
             return model
-        except Exception as e:
-            error_message = f"Ошибка при загрузке локальной LLM"
+        except Exception:
+            error_message = "Ошибка при загрузке локальной LLM"
             st.error(error_message)
             logging.error(error_message)
             return None
@@ -170,7 +170,7 @@ class LLMCPUChatbot:
                 token_text = chunk["choices"][0]["text"]
                 yield token_text
 
-        except Exception as e:
-            st.error(f"Ошибка при генерации ответа LLM")
-            logging.error(f"Ошибка при генерации ответа LLM")
+        except Exception:
+            st.error("Ошибка при генерации ответа LLM")
+            logging.error("Ошибка при генерации ответа LLM")
             return "Произошла ошибка при обработке запроса LLM."

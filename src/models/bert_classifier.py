@@ -43,11 +43,9 @@ class BertClassifier:
             AutoModelForSequenceClassification.from_pretrained(self.model_dir)
             self.model.to(self.device)
             self.model.eval()
-            logging.info(f"""Модель и токенизатор успешно загружены 
-                         из: {self.model_dir}""")
-        except Exception as e:
-            logging.error(f"""Ошибка при загрузке модели/токенизатора 
-                          из '{self.model_dir}'""")
+            logging.info("Модель и токенизатор успешно загружены")
+        except Exception:
+            logging.error("Ошибка при загрузке модели/токенизатора")
             self.model = None
             self.tokenizer = None
 

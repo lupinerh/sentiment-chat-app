@@ -1,14 +1,14 @@
 import logging
 import streamlit as st
 import time
-from src.models.logreg_classifier import LogRegClassifier 
+from src.models.sentiment_model_protocol import SentimentModelProtocol
 from src.sentiment_analysis import (analyze_text_sentiment, 
                                     get_sentiment_parameters)
 from src.app_state import add_message_to_chat_history
 from src.config_and_settings import SessionKeys
 
-def process_user_send_action(user_draft_text: str, 
-                             sentiment_model: LogRegClassifier) -> None:
+def process_user_send_action(user_draft_text: str,
+                             sentiment_model: SentimentModelProtocol) -> None:
     """Processes the user's action of sending a message."""
     if not user_draft_text.strip():
         st.toast("Пожалуйста, напишите что-нибудь перед отправкой", icon="✍️")
@@ -17,6 +17,8 @@ def process_user_send_action(user_draft_text: str,
     final_score = analyze_text_sentiment(user_draft_text, sentiment_model)
     final_label, _ = get_sentiment_parameters(final_score)
     shap_values = sentiment_model.explain_shap_text(user_draft_text)
+
+    logging.info("User отправил в чат")
 
     add_message_to_chat_history("user", user_draft_text, final_score, 
                                 final_label, shap_values)
@@ -33,7 +35,7 @@ def process_user_send_action(user_draft_text: str,
     st.rerun()
 
 
-def handle_bot_response_generation(sentiment_model: LogRegClassifier, 
+def handle_bot_response_generation(sentiment_model: SentimentModelProtocol,
                                    llm_chatbot) -> None:
     """
     Generates the bot's response, displays it streamingly,
@@ -75,6 +77,8 @@ def handle_bot_response_generation(sentiment_model: LogRegClassifier,
         bot_shap_values = sentiment_model.explain_shap_text(
             full_bot_response_text
         )
+
+        logging.info("Bot ответил в чате")
 
         add_message_to_chat_history(role="assistant",
                                     content=full_bot_response_text,

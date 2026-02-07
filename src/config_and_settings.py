@@ -36,6 +36,7 @@ class SessionKeys:
     SENTIMENT_MODELS_DICT = "sentiment_models_dict"
     LLM_CHATBOT = "llm_chatbot"
     BOT_IS_TYPING = "bot_is_typing"
+    COMPARE_MODE = "compare_mode"
 
 MODEL_ID_LOGREG = "logreg"
 MODEL_ID_BERT = "bert"
@@ -84,8 +85,8 @@ def load_config(config_path: str = CONFIG_PATH) -> dict:
             config = yaml.safe_load(f)
         return config
     except FileNotFoundError:
-        st.error(f"Конфигурационный файл не найден: {config_path}")
+        st.error("Конфигурационный файл не найден")
         return {}
-    except Exception as e:
-        st.error(f"Ошибка при загрузке конфигурационного файла: {e}")
+    except Exception:
+        st.error("Ошибка при загрузке конфигурационного файла")
         return {}
