@@ -42,8 +42,8 @@ class GeminiChatbot:
 
         try:
             self.client = genai.Client(api_key=api_key)
-        except Exception as e:
-            logging.error(f"Не удалось создать GeminiChatbot")
+        except Exception:
+            logging.error("Не удалось создать GeminiChatbot")
             self.client = None
             return
 

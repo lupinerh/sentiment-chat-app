@@ -11,8 +11,11 @@ from src.model_loader import (load_sentiment_logreg_cached,
                               load_sentiment_bert_cached, 
                               load_llm_chatbot_cached)
 from src.sentiment_analysis import analyze_text_sentiment
+from src.models.sentiment_model_protocol import SentimentModelProtocol
 from src.ui_components import (
-    configure_page, 
+    configure_page,
+    display_compare_input_sentiment_analysis,
+    display_compare_toggle,
     display_current_input_sentiment_analysis,
     display_welcome_message,
     display_chat_history,
@@ -22,17 +25,21 @@ from src.app_state import initialize_session_state
 from src.chat_logic import (process_user_send_action, 
                             handle_bot_response_generation)
 
-from src.models.logreg_classifier import LogRegClassifier
-
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s',
     datefmt='%Y-%m-%d %H:%M:%S'
 )
+logging.getLogger("httpx").setLevel(logging.WARNING)
+logging.getLogger("urllib3").setLevel(logging.WARNING)
+logging.getLogger("google.genai").setLevel(logging.WARNING)
+logging.getLogger("google.api_core").setLevel(logging.WARNING)
+logging.getLogger("google.auth").setLevel(logging.WARNING)
+logging.getLogger("grpc").setLevel(logging.WARNING)
 
 
 # -- UI Column Rendering --
-def render_left_column(sentiment_model: LogRegClassifier) -> None:
+def render_left_column(sentiment_model: SentimentModelProtocol) -> None:
     """Renders the left UI column (user input, sentiment analysis)."""
     
     bot_is_typing_now = st.session_state.get(SessionKeys.BOT_IS_TYPING, False)
@@ -40,12 +47,24 @@ def render_left_column(sentiment_model: LogRegClassifier) -> None:
         st.session_state.get(SessionKeys.USER_DRAFT_INPUT, "")
 
     text_for_analysis = st.session_state.get(SessionKeys.USER_DRAFT_INPUT, "")
-    draft_sentiment_score = analyze_text_sentiment(text_for_analysis, 
+    draft_sentiment_score = analyze_text_sentiment(text_for_analysis,
                                                    sentiment_model)
 
-    display_current_input_sentiment_analysis(draft_sentiment_score, 
-                                             text_for_analysis, 
-                                             sentiment_model)
+    compare_mode_enabled = display_compare_toggle()
+    if compare_mode_enabled:
+        models_dict = st.session_state.get(SessionKeys.SENTIMENT_MODELS_DICT, {})
+        logreg_model = models_dict.get(MODEL_ID_LOGREG)
+        bert_model = models_dict.get(MODEL_ID_BERT)
+        if logreg_model and bert_model:
+            display_compare_input_sentiment_analysis(text_for_analysis,
+                                                     logreg_model,
+                                                     bert_model)
+        else:
+            st.error("Модели сравнения не загружены")
+    else:
+        display_current_input_sentiment_analysis(draft_sentiment_score,
+                                                 text_for_analysis,
+                                                 sentiment_model)
 
     st.caption(
         "Тональность обновляется сразу. " \
@@ -73,7 +92,7 @@ def render_left_column(sentiment_model: LogRegClassifier) -> None:
         )
 
 
-def render_right_column(sentiment_model: LogRegClassifier, 
+def render_right_column(sentiment_model: SentimentModelProtocol,
                         llm_chatbot) -> None:
     """Renders the right UI column (chat history, bot response)."""
     st.caption("Модель учитывает тональность вашего сообщения при ответе.")
